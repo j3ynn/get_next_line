@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 //deve salvare quello che ha dopo lo \n nella static
 //deve ritornare tutto quello che ha prima dello \n
 char	*ft_extraction_storage(char storage[BUFFER_SIZE])
@@ -65,18 +65,18 @@ int	ft_check_storage(char storage[BUFFER_SIZE], char **line)
 
 char	*get_next_line(int fd)
 {
-	static char	storage[BUFFER_SIZE];
+	static char	storage[1024][BUFFER_SIZE];
 	char		*line;
 	int			bytes;
 
-	if (fd < 0 || BUFFER_SIZE <= 0)
+	if (fd < 0 || BUFFER_SIZE <= 0 || fd > 1024)
 		return (NULL);
 	line = NULL;
 	while (1)
 	{
-		if (ft_check_storage(storage, &line))
+		if (ft_check_storage(storage[fd], &line))
 			return (line);
-		bytes = read(fd, storage, BUFFER_SIZE);
+		bytes = read(fd, storage[fd], BUFFER_SIZE);
 		if (bytes < 0)
 		{
 			free(line);
@@ -91,19 +91,3 @@ char	*get_next_line(int fd)
 		}
 	}
 }
-/*int main()
-{
-	char	*str;
-	int		fd;
-	int		i;
-	i = 0;
-	fd = open("ensomma", O_RDONLY);
-	while (i < 30)
-	{
-		str = get_next_line(fd);
-		printf("%s" , str);
-		free(str);
-		i ++;
-	}
-	return 0;
-}*/
