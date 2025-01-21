@@ -1,63 +1,67 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   get_next_line_utils.c                              :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: jbellucc <marvin@42.fr>                    +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/01/14 11:50:45 by jbellucc          #+#    #+#             */
-/*   Updated: 2025/01/14 11:50:48 by jbellucc         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "get_next_line.h"
 
-size_t	ft_strlen(const char *str)
+char	*ft_strchr(char *str, int s)
 {
-	int	p;
+	while (*str)
+	{
+		if (*str == (char)s)
+			return ((char *)str);
+		str ++;
+	}
+	if (s == '\0' && (char)s == '\0')
+		return ((char *)str);
+	return (0);
+}
+
+char	*ft_strjoin(char *s1, char *s2)
+{
+	size_t	s1len;
+	size_t	s2len;
+	char	*s3;
+
+	s1len = ft_strlen(s1);
+	s2len = ft_strlen(s2);
+	s3 = (char *)malloc(sizeof(char) * (s1len + s2len + 1));
+	if (!s3)
+		return (NULL);
+	while (s1 && *s1)
+		*s3 ++ = *s1 ++;
+	while (s2 && *s2)
+		*s3++ = *s2++;
+	*s3 = '\0';
+	return (s3 - (s1len + s2len));
+}
+
+size_t	ft_strlen(char *str)
+{
+	size_t	p;
 
 	p = 0;
-	if (!str)
-		return (0);
-	while (str[p] != '\0')
-		p++;
+	while (str && str[p] != '\0' )
+		p ++;
 	return (p);
 }
 
-char	*ft_strdup(const char *str, size_t size)
+char	*ft_substr(char *s, unsigned int start, size_t len)
 {
-	char	*s_dup;
-	size_t	len;
-	size_t	i;
-	size_t	j;
+	char			*s2;
+	unsigned int	p;
 
-	i = 0;
-	len = ft_strlen(str);
-	s_dup = malloc(sizeof(char) * (len + 2));
-	if (!str)
+	p = 0;
+	if (!s)
 		return (NULL);
-	while (i < size)
-		s_dup[j++] = str[i++];
-	if (str[i] == '\n')
-		s_dup[j - 1] = '\n';
-	s_dup[j] = '\0';
-	return (s_dup);
-}
-
-void	ft_get_remainder(char *buffer, char *str)
-{
-	size_t	p1;
-	size_t	p2;
-
-	while (buffer[p1] != '\0' && buffer[p1] != '\n')
-		p1 ++;
-	if (buffer[p1] == '\n')
-		p1 ++;
-	while (buffer[p1])
+	if (start >= ft_strlen(s) || len == 0)
+		return (NULL);
+	if (start + len > ft_strlen(s))
+		len = ft_strlen(s) - start;
+	s2 = (char *)malloc(sizeof(char) * (len + 1));
+	if (!s2)
+		return (NULL);
+	while (len)
 	{
-		str[p2] = buffer[p1]
-		p1 ++;
-		p2 ++;
+		s2[p++] = s[start++];
+		len --;
 	}
-	str[p2] = '\0';
+	s2[p] = '\0';
+	return (s2);
 }

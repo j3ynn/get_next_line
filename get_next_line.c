@@ -1,96 +1,97 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: jbellucc <marvin@42.fr>                    +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/01/14 11:49:34 by jbellucc          #+#    #+#             */
-/*   Updated: 2025/01/14 11:49:53 by jbellucc         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "get_next_line.h"
-//per controllare se siamo arrivati alla fine del file
-char	*ft_join_tot(char *buffer, char *tot, int count_bite)
+//deve salvare quello che ha dopo lo \n nella static
+//deve ritornare tutto quello che ha prima dello \n
+char	*ft_extraction_storage(char storage[BUFFER_SIZE])
 {
-	char	*temp;
+	int		i;
+	int		p;
+	char	*str;
 
-	if (count_bite <= 0)
+	p = 0;
+	while (storage[p] != '\n')
+		p ++;
+	str = ft_substr(storage, 0, p + 1);
+	i = 0;
+	p ++;
+	while (p < BUFFER_SIZE && storage[p])
 	{
-		if (count_bite < 0 && !*tot)
-		{
-			free(tot);
-				return (NULL);
-		}
-		return (tot);
+		storage[i++] = storage[p];
+		storage[p++] = 0;
 	}
-	buffer[count_bite] = '\0';
-	temp = ft_strjoin(tot, buffer, 1);
-	return (temp);
+	while (i < BUFFER_SIZE && storage[i])
+		storage[i++] = '\0';
+	return (str);
 }
 
-char	*ft_strjoin(char *tot, char *buffer, int n)
+//deve leggere la linea tenendo anche quello che ha dopo la \n
+int	ft_check_storage(char storage[BUFFER_SIZE], char **line)
 {
-	size_t	totlen;
-	size_t	bufferlen;
-	char	*s;
+	char	*line2;
+	char	*tmp;
+	int		i;
 
-	totlen = ft_strlen(tot);
-	bufferlen = ft_strlen(buffer);
-	s = (char *)malloc(sizeof(char) * (totlen + bufferlen + 1));
-	if (!tot || !buffer || !s)
-		return (NULL);
-	while (*tot)
-		*s ++ = *tot ++;
-	while (*buffer)
-		*s ++ = *buffer ++;
-	*s = '\0';
-	if (n)
-		free(tot);
-	return (s - (totlen + bufferlen));
-}
-
-char	*ft_read_cat(char *remainder, int fd)
-{
-	char	*buffer;
-	char	*tot;
-	int		count_bite;
-
-	buffer = malloc(BUFFER_SIZE + 1);
-	if (!buffer)
-		return (NULL);
-	tot = ft_join("", remainder, 0);
-	count_bite = 0;
-	while (!(*(buffer++) != '\n'))
+	i = 0;
+	if (ft_strchr(storage, '\n') != 0)
 	{
-		count_bite = read(fd, buffer, BUFFER_SIZE);
-		tot = ft_join_tot(buffer, tot, count_bite);
-		if (!tot || count_bite == 0)
-				break;
+		line2 = ft_extraction_storage(storage);
+		tmp = *line;
+		*line = ft_strjoin(*line, line2);
+		free(line2);
+		free(tmp);
 	}
-	free(buffer);
-	return (tot);
+	else
+	{
+		tmp = *line;
+		*line = ft_strjoin(*line, storage);
+		free(tmp);
+		while (i < BUFFER_SIZE)
+			storage[i++] = 0;
+		return (0);
+	}
+	return (1);
 }
 
 char	*get_next_line(int fd)
 {
-	static char	remainder[BUFFER_SIZE];
-	char		*buffer;
+	static char	storage[BUFFER_SIZE];
 	char		*line;
+	int			bytes;
 
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
-	buffer = ft_read_cat(remainder, fd);
-	if (!buffer)
-		return (NULL);
-	line = ft_strdup(buffer, size);
-	if (!line)
+	line = NULL;
+	while (1)
 	{
-		free(line);
-		return (NULL);
+		if (ft_check_storage(storage, &line))
+			return (line);
+		bytes = read(fd, storage, BUFFER_SIZE);
+		if (bytes < 0)
+		{
+			free(line);
+			return (NULL);
+		}
+		if (bytes == 0)
+		{
+			if (ft_strlen(line) != 0)
+				return (line);
+			free(line);
+			return (NULL);
+		}
 	}
-	remainder = ft_get_remainder(buffer, remainder);
-	free(buffer);
-	return (line);
 }
+/*int main()
+{
+	char	*str;
+	int		fd;
+	int		i;
+	i = 0;
+	fd = open("ensomma", O_RDONLY);
+	while (i < 30)
+	{
+		str = get_next_line(fd);
+		printf("%s" , str);
+		free(str);
+		i ++;
+	}
+	return 0;
+}*/
